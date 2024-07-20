@@ -115,9 +115,9 @@ def download_airbnb_data(base_url, state,city, date):
 # MySQL connection settings
 mysql_config = {
     'host': 'localhost',
-    'user': 'root',
-    'password': 'Ganeshp9',
-    'database': 'airbnb'
+    'user': '****',
+    'password': '*****',
+    'database': '****'
 }
 
 # Create MySQL engine

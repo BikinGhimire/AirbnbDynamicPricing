@@ -3,9 +3,9 @@ from sqlalchemy import create_engine, text
 
 mysql_config = {
     'host': 'localhost',
-    'user': 'root',
-    'password': 'Ganeshp9',
-    'database': 'airbnb'
+    'user': '***',
+    'password': '****',
+    'database': '****'
 }
 
 engine = create_engine(f"mysql+mysqlconnector://{mysql_config['user']}:{mysql_config['password']}@{mysql_config['host']}/{mysql_config['database']}")
