@@ -411,7 +411,7 @@ def inputdatapreprocess_encoding():
 
 input_test = inputdatapreprocess_encoding()
 
-# Prediction button
+# Price Prediction button
 _, col2, _ = st.columns(3)
 with col2:
     run_preds = st.button('Predict the price')
@@ -425,6 +425,126 @@ with col2:
         # print(set(input_test.columns).difference(set(lgbm_model.feature_name_)))
 
         # convert the log pricce to actual price
-        st.info(f"Predicted price is ${round(exp(lgbm_model.predict(input_test)), 2)}")
+        predicted_price = round(exp(lgbm_model.predict(input_test)), 2)
+
+        st.info(f"Predicted price is ${predicted_price}")
+
+if predicted_price != 0:
+    st.subheader('K means clustering Demo')
+
+    # Loading airbnb data of 8 cities
+    montreal = pd.read_csv('../Dataset/Airbnb/Montreal.csv')
+    newbrunswick = pd.read_csv('../Dataset/Airbnb/NewBrunswick.csv')
+    ottawa = pd.read_csv('../Dataset/Airbnb/Ottawa.csv')
+    quebeccity = pd.read_csv('../Dataset/Airbnb/QuebecCity.csv')
+    toronto = pd.read_csv('../Dataset/Airbnb/Toronto.csv')
+    vancouver = pd.read_csv('../Dataset/Airbnb/Vancouver.csv')
+    victoria = pd.read_csv('../Dataset/Airbnb/Victoria.csv')
+    winnipeg = pd.read_csv('../Dataset/Airbnb/Winnipeg.csv')
+
+    # Adding a City column to each dataframes
+    montreal['city'] = 'Montreal'
+    newbrunswick['city'] = 'New Brunswick'
+    ottawa['city'] = 'Ottawa'
+    quebeccity['city'] = 'Quebec City'
+    toronto['city'] = 'Toronto'
+    vancouver['city'] = 'Vancouver'
+    victoria['city'] = 'Victoria'
+    winnipeg['city'] = 'Winnipeg'
+
+    # Merging data from different cities to a single dataframe
+    airbnb_df = pd.concat([montreal, newbrunswick, ottawa, quebeccity, toronto, vancouver, victoria, winnipeg],
+                          ignore_index=True)
+
+    cluster_df = airbnb_df[
+        ['id', 'name', 'property_type', 'room_type', 'latitude', 'longitude', 'accommodates', 'amenities',
+         'price']]
+
+    cluster_df = cluster_df.dropna(subset=['price'])
+
+    clustering_input_df = {
+        'id': id,
+        'name': listing_title,
+        'property_type': property_type,
+        'room_type': room_type,
+        'latitude': lat,
+        'longitude': lon,
+        'accommodates': accommodates,
+        'amenities': [amenities],
+        'price': predicted_price
+    }
+
+    # Merge clustering_input_df into cluster_df using only the necessary features above, and without preprocessing
+
+    cluster_df = pd.concat([cluster_df, pd.DataFrame(clustering_input_df, index=[0])], ignore_index=True)
+
+    from sklearn.preprocessing import StandardScaler, LabelEncoder
+    from sklearn.cluster import KMeans
+    from geopy.distance import great_circle
+
+    # Create a LabelEncoder instance
+    label_encoder_property_type = LabelEncoder()
+    label_encoder_room_type = LabelEncoder()
+
+    # Apply label encoding to 'property_type' and 'room_type'
+    cluster_df['property_type_encoded'] = label_encoder_property_type.fit_transform(cluster_df['property_type'])
+    cluster_df['room_type_encoded'] = label_encoder_room_type.fit_transform(cluster_df['room_type'])
+
+    # Feature Engineering
+    features = cluster_df[['accommodates', 'room_type_encoded', 'property_type_encoded']]
+    scaler = StandardScaler()
+    features_scaled = scaler.fit_transform(features)
+
+    kmeans = KMeans(n_clusters=15, random_state=42)  # Adjust n_clusters as needed
+    cluster_df['cluster'] = kmeans.fit_predict(features_scaled)
+
+    # Example usage: find similar listings for a randomly selected target listing
+    target_listing_id = id
+
+    # Find the cluster of the target listing
+    target_cluster = cluster_df[cluster_df['id'] == target_listing_id]['cluster'].values[0]
+
+    # Get the latitude and longitude of the target listing
+    target_location = cluster_df[cluster_df['id'] == target_listing_id][['latitude', 'longitude']].values[0]
+
+    # Filter the listings that fall into the same cluster
+    same_cluster_listings = cluster_df[cluster_df['cluster'] == target_cluster]
+
+
+    # Function to check if a listing is within a given radius
+    def is_within_radius(row, target_location, radius_km):
+        listing_location = (row['latitude'], row['longitude'])
+        return great_circle(listing_location, target_location).km <= radius_km
+
+
+    # Apply the distance function
+    same_cluster_listings['within_radius'] = same_cluster_listings.apply(is_within_radius,
+                                                                         target_location=target_location,
+                                                                         radius_km=2, axis=1)
+
+    # Filter listings that are within the 2km radius
+    within_radius_listings = same_cluster_listings[same_cluster_listings['within_radius']]
+
+    # Drop the 'within_radius' column as it's no longer needed
+    within_radius_listings = within_radius_listings.drop(columns=['within_radius'])
+
+    print(f'{within_radius_listings.shape[0]} similar listings found nearby.')
+
+    # Decode the label encoding for 'property_type' and 'room_type'
+    within_radius_listings['property_type'] = label_encoder_property_type.inverse_transform(
+        within_radius_listings['property_type_encoded'])
+    within_radius_listings['room_type'] = label_encoder_room_type.inverse_transform(
+        within_radius_listings['room_type_encoded'])
+
+    # Display specified columns
+    display_columns = ['name', 'property_type', 'room_type', 'accommodates', 'amenities', 'latitude',
+                       'longitude',
+                       'price']
+    result = within_radius_listings[display_columns]
+
+# Display the result
+st.write(result.head(5))
+
+
 
 
