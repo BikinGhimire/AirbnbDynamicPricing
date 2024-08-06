@@ -12,4 +12,4 @@ SQLAlchemy==2.0.32
 streamlit==1.36.0
 streamlit_folium==0.22.0
 vaderSentiment==3.3.2
-lightgbm==3.3.2
+lightgbm==4.5.0
