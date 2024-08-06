@@ -11,6 +11,7 @@ import folium
 
 
 
+
 # Set up header and brief description
 with st.container():
     st.title('Airbnb Price Predictor')
@@ -269,7 +270,7 @@ def inputdatapreprocess_encoding():
     input_test.drop(columns=['host_since', 'first_review_date', 'last_review_date'], inplace=True)
     # Number of attractions
     # attractions_df = pd.read_csv('Dataset/Locations/canadian_tourist_attractions.csv')
-    attractions_df = pd.read_csv('../Dataset/Locations/canadian_tourist_attractions.csv')
+    attractions_df = pd.read_csv('./Dataset/Locations/canadian_tourist_attractions.csv')
     attractions_df['city'] = attractions_df['city'].str.title().str.replace('_', ' ')
 
     def count_attractions_within_radius(airbnb_lat, airbnb_lon, attractions, radius_km=10):
@@ -424,7 +425,7 @@ with col2:
     run_preds = st.button('Predict the price')
     if run_preds:
         # Load AI model from pickle file
-        with open('../deployment/lgbm_model.pkl', 'rb') as f:
+        with open('./deployment/lgbm_model.pkl', 'rb') as f:
             lgbm_model = pickle.load(f)
 
         # Now you can safely use the test dataset for prediction
@@ -440,14 +441,14 @@ if predicted_price != 0:
     st.subheader('K means clustering Demo')
 
     # Loading airbnb data of 8 cities
-    montreal = pd.read_csv('../Dataset/Airbnb/Montreal.csv')
-    newbrunswick = pd.read_csv('../Dataset/Airbnb/NewBrunswick.csv')
-    ottawa = pd.read_csv('../Dataset/Airbnb/Ottawa.csv')
-    quebeccity = pd.read_csv('../Dataset/Airbnb/QuebecCity.csv')
-    toronto = pd.read_csv('../Dataset/Airbnb/Toronto.csv')
-    vancouver = pd.read_csv('../Dataset/Airbnb/Vancouver.csv')
-    victoria = pd.read_csv('../Dataset/Airbnb/Victoria.csv')
-    winnipeg = pd.read_csv('../Dataset/Airbnb/Winnipeg.csv')
+    montreal = pd.read_csv('./Dataset/Airbnb/Montreal.csv')
+    newbrunswick = pd.read_csv('./Dataset/Airbnb/NewBrunswick.csv')
+    ottawa = pd.read_csv('./Dataset/Airbnb/Ottawa.csv')
+    quebeccity = pd.read_csv('./Dataset/Airbnb/QuebecCity.csv')
+    toronto = pd.read_csv('./Dataset/Airbnb/Toronto.csv')
+    vancouver = pd.read_csv('./Dataset/Airbnb/Vancouver.csv')
+    victoria = pd.read_csv('./Dataset/Airbnb/Victoria.csv')
+    winnipeg = pd.read_csv('./Dataset/Airbnb/Winnipeg.csv')
 
     # Adding a City column to each dataframes
     montreal['city'] = 'Montreal'
