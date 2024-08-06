@@ -8,9 +8,14 @@ from streamlit_folium import st_folium
 import streamlit as st
 import pandas as pd
 import folium
+from nltk.data import find, path
+import nltk
 
-
-
+def ensure_nltk_resources():
+    try:
+        find('sentiment/vader_lexicon.zip')
+    except LookupError:
+        nltk.download('vader_lexicon')
 
 # Set up header and brief description
 with st.container():
@@ -380,6 +385,7 @@ def inputdatapreprocess_encoding():
     # Sentiment Scores
 
     # creating an object of sentiment intensity analyzer
+    ensure_nltk_resources()
     sia = SentimentIntensityAnalyzer()
     # creating new columns using polarity scores function
     input_test['title_scores'] = input_test['title'].apply(lambda title: sia.polarity_scores(str(title)))
