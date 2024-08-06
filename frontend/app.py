@@ -62,6 +62,8 @@ if 'last_object_clicked' in st_data and st_data['last_object_clicked']:
     lon = st_data['last_object_clicked']['lng']
     st.write(f"Marker Location: Latitude = {lat}, Longitude = {lon}")
 else:
+    lat = 0.0
+    lon = 0.0
     st.write("Drag the marker to select a location.")
 
 listing_title = st.text_input("Enter the list title")
@@ -193,6 +195,8 @@ text_review =st.text_area("Write your reviews here")
 def inputdatapreprocess_encoding():
 
     global data, key, value, input_test, haversine_distance, item, sia
+
+
     # Create a dictionary to store the data of all the inputs including the location of the marker and dates as well
     data = {
         'city': city,
@@ -411,6 +415,9 @@ def inputdatapreprocess_encoding():
 
 input_test = inputdatapreprocess_encoding()
 
+global predicted_price
+predicted_price =0
+
 # Price Prediction button
 _, col2, _ = st.columns(3)
 with col2:
@@ -540,10 +547,11 @@ if predicted_price != 0:
     display_columns = ['name', 'property_type', 'room_type', 'accommodates', 'amenities', 'latitude',
                        'longitude',
                        'price']
+
     result = within_radius_listings[display_columns]
 
-# Display the result
-st.write(result.head(5))
+    # Display the result
+    st.write(result.head(5))
 
 
 
