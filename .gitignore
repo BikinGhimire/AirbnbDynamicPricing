@@ -1,0 +1,14 @@
+# Ignore .ipynb files in 'test' and 'release' branches
+[branch="test"]
+*.ipynb
+*.html
+__pycache__/
+.idea/
+.ipynb_checkpoints/
+
+[branch="main"]
+*.ipynb
+*.html
+__pycache__/
+.idea/
+.ipynb_checkpoints/
