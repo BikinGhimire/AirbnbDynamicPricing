@@ -1,0 +1,15 @@
+folium==0.17.0
+geopy==2.4.1
+mysql_connector_repackaged==0.3.1
+nltk==3.8.1
+numpy>=1.23.2,<2.0
+overpy==0.7
+pandas==2.2.2
+Requests==2.32.3
+scikit_learn==1.4.1.post1
+selenium==4.23.1
+SQLAlchemy==2.0.32
+streamlit==1.36.0
+streamlit_folium==0.22.0
+vaderSentiment==3.3.2
+lightgbm==4.5.0
