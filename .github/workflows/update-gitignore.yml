@@ -1,4 +1,4 @@
-name: Update .gitignore
+name: Clean up unwanted files
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
       - release
 
 jobs:
-  update-gitignore:
+  cleanup:
     runs-on: ubuntu-latest
 
     permissions:
@@ -22,14 +22,15 @@ jobs:
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
 
-    - name: Add/update .gitignore
+    - name: Remove unwanted files and directories
       run: |
-        echo "# Ignore Jupyter notebook files" > .gitignore
-        echo "*.ipynb" >> .gitignore
-        echo "# Ignore HTML files" >> .gitignore
-        echo "*.html" >> .gitignore
-        echo "# Ignore __pycache__, .idea, and .ipynb_checkpoints directories" >> .gitignore
-        echo "__pycache__/" >> .gitignore
-        echo ".idea/" >> .gitignore
-        echo ".ipynb_checkpoints/" >> .gitignore
-        git diff --exit-code || (git add .gitignore && git commit -m "Update .gitignore for ${GITHUB_REF##*/}" && git push)
+        # Remove Jupyter notebook files
+        find . -name "*.ipynb" -type f -delete
+        # Remove HTML files
+        find . -name "*.html" -type f -delete
+        # Remove __pycache__, .idea, and .ipynb_checkpoints directories
+        find . -name "__pycache__" -type d -exec rm -r {} +
+        find . -name ".idea" -type d -exec rm -r {} +
+        find . -name ".ipynb_checkpoints" -type d -exec rm -r {} +
+        
+        git diff --exit-code || (git add -A && git commit -m "Remove unwanted files for ${GITHUB_REF##*/}" && git push)

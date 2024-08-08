@@ -144,15 +144,13 @@ number_of_days_available_in_year = st.slider('Number of days available', 12, 365
 
 
 
-
-
 # Section for host info
 st.markdown('---')
 st.subheader('Host Information')
 col1, col2 = st.columns(2)
 with col1:
     host_registration_date = st.date_input("Enter host registration date",datetime.today())
-    no_of_listings = st.slider('How many listings does the host have?', 1, 16, 4)
+    # no_of_listings = st.slider('How many listings does the host have?', 1, 16, 4)
     super_host = st.selectbox('Is your host a superhost?', ('No', 'Yes'))
     host_response_rate = st.slider('Host Response Rate', 0, 100, 0)
     host_acceptance_rate = st.slider('Host Acceptance Rate', 0, 100, 0)
@@ -160,7 +158,7 @@ with col2:
     availability = st.selectbox('Is the listing available?', ('Yes', 'No'))
     response = st.selectbox('Response time', (
     'within an hour', 'within a few hours', 'within a day', 'a few days or more'))
-    no_of_reivews = st.slider('How many review does the host have?', 1, 16, 4)
+    # no_of_reivews = st.slider('How many review does the host have?', 1, 16, 4)
 
 
 host_license =st.selectbox('Is your host licensed?', ('Yes', 'No'))
@@ -189,8 +187,8 @@ with col3:
     value_for_money_rating = st.slider('Value for money rating', 1.0, 5.0, 3.5, step=0.5)
     overall_rating = st.slider('Overall rating', 1.0, 5.0, 4.0, step=0.5)
 
-first_review_date = st.date_input('First review date')
-last_review_date = st.date_input('Last review date')
+# first_review_date = st.date_input('First review date')
+# last_review_date = st.date_input('Last review date')
 
 
 text_review =st.text_area("Write your reviews here")
@@ -225,13 +223,13 @@ def inputdatapreprocess_encoding():
         'availability_90': number_of_days_available_in_three_months,
         'availability_365': number_of_days_available_in_year,
         'host_since': host_registration_date,
-        'host_listings_count': no_of_listings,
+        # 'host_listings_count': no_of_listings,
         'host_is_superhost': super_host,
         'host_response_rate': host_response_rate,
         'host_acceptance_rate': host_acceptance_rate,
         'has_availability': availability,
         'host_response_time': response,
-        'number_of_reviews': no_of_reivews,
+        # 'number_of_reviews': no_of_reivews,
         'license': host_license,
         'host_identity_verified': host_identity_verified,
         'host_verifications': [host_verifications],
@@ -241,8 +239,8 @@ def inputdatapreprocess_encoding():
         'review_scores_communication': communication,
         'review_scores_value_for_money': value_for_money_rating,
         'review_scores_rating': overall_rating,
-        'first_review_date': first_review_date,
-        'last_review_date': last_review_date,
+        # 'first_review_date': first_review_date,
+        # 'last_review_date': last_review_date,
         'text_review': text_review
     }
 
@@ -264,15 +262,15 @@ def inputdatapreprocess_encoding():
     today_date = datetime.today().strftime('%Y-%m-%d')
     # Converting date columns
     input_test['host_since'] = pd.to_datetime(input_test['host_since'])
-    input_test['first_review_date'] = pd.to_datetime(input_test['first_review_date'])
-    input_test['last_review_date'] = pd.to_datetime(input_test['last_review_date'])
+    # input_test['first_review_date'] = pd.to_datetime(input_test['first_review_date'])
+    # input_test['last_review_date'] = pd.to_datetime(input_test['last_review_date'])
     current_date = datetime.now()
     # Calculating values and storing in a new column
     input_test['host_since_days'] = (current_date - input_test['host_since']).dt.days
-    input_test['first_review_days'] = (current_date - input_test['first_review_date']).dt.days
-    input_test['last_review_days'] = (current_date - input_test['last_review_date']).dt.days
+    # input_test['first_review_days'] = (current_date - input_test['first_review_date']).dt.days
+    # input_test['last_review_days'] = (current_date - input_test['last_review_date']).dt.days
     # Dropping date columns
-    input_test.drop(columns=['host_since', 'first_review_date', 'last_review_date'], inplace=True)
+    input_test.drop(columns=['host_since'], inplace=True)
     # Number of attractions
     # attractions_df = pd.read_csv('Dataset/Locations/canadian_tourist_attractions.csv')
     attractions_df = pd.read_csv('./Dataset/Locations/canadian_tourist_attractions.csv')
@@ -422,8 +420,8 @@ def inputdatapreprocess_encoding():
 
 input_test = inputdatapreprocess_encoding()
 
-global predicted_price
-predicted_price =0
+
+isPredictedPriceAvailable = False
 
 # Price Prediction button
 _, col2, _ = st.columns(3)
@@ -438,13 +436,20 @@ with col2:
         # print(set(lgbm_model.feature_name_).difference(set(input_test.columns)))
         # print(set(input_test.columns).difference(set(lgbm_model.feature_name_)))
 
-        # convert the log pricce to actual price
-        predicted_price = round(exp(lgbm_model.predict(input_test)), 2)
+        input_test = input_test[sorted(input_test.columns)]
+        predicted_price = lgbm_model.predict(input_test)
 
-        st.info(f"Predicted price is ${predicted_price}")
+        # st.write(predicted_price)
+        if predicted_price != 0:
+            isPredictedPriceAvailable = True
 
-if predicted_price != 0:
-    st.subheader('K means clustering Demo')
+        actual_predicted_price=int(np.exp(predicted_price))
+
+        st.info(f"Predicted price is ${actual_predicted_price}")
+
+
+if isPredictedPriceAvailable:
+    st.subheader('Similar Listings Nearby')
 
     # Loading airbnb data of 8 cities
     montreal = pd.read_csv('./Dataset/Airbnb/Montreal.csv')
@@ -485,7 +490,7 @@ if predicted_price != 0:
         'longitude': lon,
         'accommodates': accommodates,
         'amenities': [amenities],
-        'price': predicted_price
+        'price': actual_predicted_price
     }
 
     # Merge clustering_input_df into cluster_df using only the necessary features above, and without preprocessing
@@ -542,20 +547,24 @@ if predicted_price != 0:
     # Drop the 'within_radius' column as it's no longer needed
     within_radius_listings = within_radius_listings.drop(columns=['within_radius'])
 
-    print(f'{within_radius_listings.shape[0]} similar listings found nearby.')
+    # Exclude the target listing from the final result
+    final_result = within_radius_listings[within_radius_listings['id'] != target_listing_id]
+
+    print(f'{final_result.shape[0]} similar listings found nearby.')
+    st.write(f"{final_result.shape[0]} similar listings found nearby.")
 
     # Decode the label encoding for 'property_type' and 'room_type'
-    within_radius_listings['property_type'] = label_encoder_property_type.inverse_transform(
-        within_radius_listings['property_type_encoded'])
-    within_radius_listings['room_type'] = label_encoder_room_type.inverse_transform(
-        within_radius_listings['room_type_encoded'])
+    final_result['property_type'] = label_encoder_property_type.inverse_transform(
+        final_result['property_type_encoded'])
+    final_result['room_type'] = label_encoder_room_type.inverse_transform(
+        final_result['room_type_encoded'])
 
     # Display specified columns
     display_columns = ['name', 'property_type', 'room_type', 'accommodates', 'amenities', 'latitude',
                        'longitude',
                        'price']
 
-    result = within_radius_listings[display_columns]
+    result = final_result[display_columns]
 
     # Display the result
     st.write(result.head(5))
