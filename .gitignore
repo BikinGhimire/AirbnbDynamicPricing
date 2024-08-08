@@ -1,4 +1,8 @@
+# Ignore Jupyter notebook files
+*.ipynb
+# Ignore HTML files
+*.html
+# Ignore __pycache__, .idea, and .ipynb_checkpoints directories
 __pycache__/
 .idea/
 .ipynb_checkpoints/
-
