@@ -1,0 +1,30 @@
+name: Update .gitignore
+
+on:
+  push:
+    branches:
+      - dev
+      - test
+      - release
+
+jobs:
+  update-gitignore:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Update .gitignore
+      run: |
+        echo "# Ignore Jupyter notebook files" > .gitignore
+        echo "*.ipynb" >> .gitignore
+        echo "# Ignore HTML files" >> .gitignore
+        echo "*.html" >> .gitignore
+        echo "# Ignore __pycache__, .idea, and .ipynb_checkpoints directories" >> .gitignore
+        echo "__pycache__/" >> .gitignore
+        echo ".idea/" >> .gitignore
+        echo ".ipynb_checkpoints/" >> .gitignore
+        git add .gitignore
+        git commit -m "Update .gitignore for ${GITHUB_REF##*/} branch" --no-verify
+        git push
