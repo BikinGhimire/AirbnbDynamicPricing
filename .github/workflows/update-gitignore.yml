@@ -3,13 +3,15 @@ name: Update .gitignore
 on:
   push:
     branches:
-      - dev
       - test
       - release
 
 jobs:
   update-gitignore:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
 
     steps:
     - name: Checkout code
@@ -20,7 +22,7 @@ jobs:
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
 
-    - name: Update .gitignore
+    - name: Add/update .gitignore
       run: |
         echo "# Ignore Jupyter notebook files" > .gitignore
         echo "*.ipynb" >> .gitignore
@@ -30,6 +32,4 @@ jobs:
         echo "__pycache__/" >> .gitignore
         echo ".idea/" >> .gitignore
         echo ".ipynb_checkpoints/" >> .gitignore
-        git add .gitignore
-        git commit -m "Update .gitignore for ${GITHUB_REF##*/} branch" --no-verify
-        git push
+        git diff --exit-code || (git add .gitignore && git commit -m "Update .gitignore for ${GITHUB_REF##*/}" && git push)
