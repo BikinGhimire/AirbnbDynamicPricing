@@ -5,6 +5,7 @@ on:
     branches:
       - test
       - release
+      - main
 
 jobs:
   cleanup:
